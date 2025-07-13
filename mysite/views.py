@@ -42,7 +42,7 @@ from datetime import datetime
 
 def rollback_task_detail(request):
     # 模擬每一筆的 ooc_record_status
-    base_tasks = [
+    base_tasks = [ㄋ
         {'cname': 'Xbar-R', 'gname': 'Line1', 'ctype': 'Xbar-R', 'reason': '點超出UCL', 'ooc_record_status': '正常'},
         {'cname': 'XR', 'gname': 'Line2', 'ctype': 'XR', 'reason': '連續7點上升', 'ooc_record_status': '超過半年high'},
         {'cname': 'P Chart', 'gname': 'Line3', 'ctype': 'P', 'reason': 'None', 'ooc_record_status': '正常'},
