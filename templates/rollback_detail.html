@@ -3,74 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ task.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { padding: 20px; }
-        .status { font-weight: bold; color: green; }
-        .task-table th, .task-table td { text-align: center; }
+        body {
+            padding: 40px 0;
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+            min-height: 100vh;
+        }
+        .container-xl {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 40px 32px 32px 32px;
+            max-width: 1200px;
+        }
+        .status {
+            font-weight: bold;
+            color: #1e7e34;
+            font-size: 1.1rem;
+        }
+        .task-table th, .task-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table thead th {
+            background: #f1f5fa;
+            font-size: 1.05rem;
+        }
+        h3, h5 {
+            font-weight: 600;
+        }
+        .modal-content {
+            border-radius: 1rem;
+        }
+        .btn-link {
+            font-size: 1rem;
+        }
+        .mb-3 p {
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .container-xl { padding: 20px 5px; }
+            .table { font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
-    <h3>{{ task.title }}</h3>
-    <div class="mb-3">
-        <p><strong>狀態：</strong><span class="status">{{ task.status }}</span></p>
-        <p><strong>申請人：</strong>{{ task.applicant }}</p>
-        <p><strong>FAB：</strong>{{ task.fab }}</p>
-        <p><strong>建立時間：</strong>{{ task.create_time }}</p>
-        <p><strong>任務類型：</strong>{{ task.task_type }}</p>
-        <p><strong>時限：</strong>{{ task.expire }}</p>
-    </div>
-
-    <h5>任務項目列表</h5>
-    <table class="table table-bordered task-table">
-        <thead>
-            <tr>
-                <th>CNAME</th>
-                <th>GNAME</th>
-                <th>CTYPE</th>
-                <th>TREND CHART</th>
-                <th>REASON</th>
-                <th>OOC/Record狀態</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in task.tasks %}
-            <tr>
-                <td>{{ item.cname }}</td>
-                <td>{{ item.gname }}</td>
-                <td>{{ item.ctype }}</td>
-                <td>
-                    <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#trendChartModal{{ forloop.counter }}">
-                        查看圖表
-                    </button>
-                    <!-- Modal -->
-                    <div class="modal fade" id="trendChartModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="trendChartModalLabel{{ forloop.counter }}" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="trendChartModalLabel{{ forloop.counter }}">{{ item.cname }} SPC 圖</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            <img src="/static/spc_charts/{{ item.trend_chart }}" alt="SPC Chart" class="img-fluid">
+    <div class="container-xl mt-4 mb-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="fw-bold mb-1" style="letter-spacing:1px;">{{ task.title }}</h2>
+                <div class="text-secondary mb-2">Dashboard · SPC 任務管理</div>
+            </div>
+            <div>
+                <span class="badge bg-success fs-6 px-3 py-2">{{ task.status }}</span>
+            </div>
+        </div>
+        <div class="row g-4 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="bg-light rounded-3 p-3 shadow-sm h-100">
+                    <div class="text-muted small">申請人</div>
+                    <div class="fw-semibold fs-5">{{ task.applicant }}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="bg-light rounded-3 p-3 shadow-sm h-100">
+                    <div class="text-muted small">FAB</div>
+                    <div class="fw-semibold fs-5">{{ task.fab }}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="bg-light rounded-3 p-3 shadow-sm h-100">
+                    <div class="text-muted small">建立時間</div>
+                    <div class="fw-semibold fs-5">{{ task.create_time }}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="bg-light rounded-3 p-3 shadow-sm h-100">
+                    <div class="text-muted small">任務類型</div>
+                    <div class="fw-semibold fs-5">{{ task.task_type }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center mb-2">
+            <h5 class="mb-0 me-3">任務項目列表</h5>
+            <span class="badge bg-primary bg-opacity-25 text-primary">共 {{ task.tasks|length }} 項</span>
+            <span class="ms-auto text-muted small">時限：{{ task.expire }}</span>
+        </div>
+        <div class="table-responsive">
+        <table class="table table-hover table-bordered task-table align-middle bg-white">
+            <thead>
+                <tr style="background: #f6f8fa;">
+                    <th>CNAME</th>
+                    <th>GNAME</th>
+                    <th>CTYPE</th>
+                    <th>TREND CHART</th>
+                    <th>REASON</th>
+                    <th>OOC/Record狀態</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in task.tasks %}
+                <tr>
+                    <td class="fw-semibold">{{ item.cname }}</td>
+                    <td>{{ item.gname }}</td>
+                    <td>{{ item.ctype }}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-primary btn-sm px-2 py-1" data-bs-toggle="modal" data-bs-target="#trendChartModal{{ forloop.counter }}">
+                            <i class="bi bi-bar-chart"></i> 查看圖表
+                        </button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="trendChartModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="trendChartModalLabel{{ forloop.counter }}" aria-hidden="true">
+                          <div class="modal-dialog modal-xl modal-dialog-centered">
+                            <div class="modal-content" style="border-radius: 1.5rem; background: #f8fafc;">
+                              <div class="modal-header border-0" style="background: linear-gradient(90deg, #e0e7ef 0%, #f8fafc 100%); border-top-left-radius:1.5rem;border-top-right-radius:1.5rem;">
+                                <div class="d-flex flex-column flex-md-row w-100 align-items-md-center justify-content-between">
+                                  <div>
+                                    <h4 class="modal-title fw-bold mb-1" id="trendChartModalLabel{{ forloop.counter }}">{{ item.cname }} SPC 圖</h4>
+                                    <div class="text-secondary small">Dashboard · SPC 圖表資訊</div>
+                                  </div>
+                                  <div class="d-flex align-items-center gap-2 ms-md-3 mt-2 mt-md-0">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="nextCaseBtn{{ forloop.counter }}">下一個 Case</button>
+                                  </div>
+<script>
+// 切換到下一個 case 的簡易前端邏輯
+document.addEventListener('DOMContentLoaded', function() {
+  var total = Number('{{ task.tasks|length }}');
+  for (var i = 1; i <= total; i++) {
+    var btn = document.getElementById('nextCaseBtn' + i);
+    if (btn) {
+      btn.addEventListener('click', (function(idx) {
+        return function() {
+          var nextIdx = idx + 1;
+          var nextModal = document.getElementById('trendChartModal' + nextIdx);
+          var currModal = document.getElementById('trendChartModal' + idx);
+          if (nextModal) {
+            var modal = bootstrap.Modal.getOrCreateInstance(currModal);
+            modal.hide();
+            setTimeout(function() {
+              var next = bootstrap.Modal.getOrCreateInstance(nextModal);
+              next.show();
+            }, 400);
+          }
+        }
+      })(i));
+    }
+  }
+});
+</script>
+                                </div>
+                              </div>
+                              <div class="modal-body p-4">
+                                <div class="row g-4 align-items-stretch flex-nowrap">
+                                  <div class="col-md-8 col-12">
+                                    <div class="row g-3">
+                                      <div class="col-12">
+                                        <div class="card shadow-sm border-0 w-100 d-flex align-items-center justify-content-center p-3 mb-2" style="background: #fff;">
+                                          <div class="w-100 text-center mb-2 fw-bold text-secondary">BY TIME</div>
+                                          <img src="/static/spc_charts/{{ item.trend_chart }}" alt="SPC Chart BY TIME" class="img-fluid rounded-4 border shadow-sm" style="max-height:38vh;object-fit:contain;">
+                                        </div>
+                                      </div>
+                                      <div class="col-md-6 col-12">
+                                        <div class="card shadow-sm border-0 w-100 d-flex align-items-center justify-content-center p-3 mb-2" style="background: #fff;">
+                                          <div class="w-100 text-center mb-2 fw-bold text-secondary">BY PART</div>
+                                          <img src="/static/spc_charts/{{ item.trend_chart }}" alt="SPC Chart BY PART" class="img-fluid rounded-4 border shadow-sm" style="max-height:18vh;object-fit:contain;">
+                                        </div>
+                                      </div>
+                                      <div class="col-md-6 col-12">
+                                        <div class="card shadow-sm border-0 w-100 d-flex align-items-center justify-content-center p-3 mb-2" style="background: #fff;">
+                                          <div class="w-100 text-center mb-2 fw-bold text-secondary">BY TOOL</div>
+                                          <img src="/static/spc_charts/{{ item.trend_chart }}" alt="SPC Chart BY TOOL" class="img-fluid rounded-4 border shadow-sm" style="max-height:18vh;object-fit:contain;">
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="col-md-4 col-12 mb-3 mb-md-0">
+                                    <div class="card shadow-sm border-0 h-100">
+                                      <div class="card-body">
+                                        <div class="mb-3">
+                                          <span class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 mb-2">圖檔資訊</span>
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                          <div class="col-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                              <div class="card-body py-2 px-3 text-center">
+                                                <div class="fw-bold text-secondary mb-1">CNAME</div>
+                                                <div class="fs-6">{{ item.cname }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                              <div class="card-body py-2 px-3 text-center">
+                                                <div class="fw-bold text-secondary mb-1">GNAME</div>
+                                                <div class="fs-6">{{ item.gname }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                              <div class="card-body py-2 px-3 text-center">
+                                                <div class="fw-bold text-secondary mb-1">CTYPE</div>
+                                                <div class="fs-6">{{ item.ctype }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                          <div class="col-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                              <div class="card-body py-2 px-3 text-center">
+                                                <div class="fw-bold text-secondary mb-1">UCL</div>
+                                                <div class="fs-6">{{ item.ucl|default:'--' }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                              <div class="card-body py-2 px-3 text-center">
+                                                <div class="fw-bold text-secondary mb-1">Target</div>
+                                                <div class="fs-6">{{ item.target|default:'--' }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                              <div class="card-body py-2 px-3 text-center">
+                                                <div class="fw-bold text-secondary mb-1">LCL</div>
+                                                <div class="fs-6">{{ item.lcl|default:'--' }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <!-- 新分頁按鈕已移除 -->
+                                        <div class="row w-100 g-3 mt-1">
+                                          <div class="col-12">
+                                            <div class="card border-0 shadow-sm h-100 mt-3">
+                                              <div class="card-body py-3">
+                                                <div class="fw-bold text-secondary mb-2">OOC/Record 狀態</div>
+                                                <div class="fs-5">{{ item.ooc_record_status }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-12">
+                                            <div class="card border-0 shadow-sm h-100 mt-3">
+                                              <div class="card-body py-3">
+                                                <div class="fw-bold text-secondary mb-2">REASON</div>
+                                                <div class="fs-6">{{ item.reason }}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-4">
+                                  <button class="btn btn-outline-secondary btn-lg px-4" data-bs-dismiss="modal">關閉</button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                </td>
-                <td>{{ item.reason }}</td>
-                <td>{{ item.ooc_record_status }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h5>attachments</h5>
-    <div>
-        <button class="btn btn-secondary">匯出紀錄</button>
-        <button class="btn btn-success">同意</button>
-        <button class="btn btn-danger">拒絕</button>
-        <button class="btn btn-warning text-white">警告送出</button>
+                    </td>
+                    <td>{{ item.reason }}</td>
+                    <td>{{ item.ooc_record_status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div class="d-flex align-items-center mt-4">
+            <h5 class="mb-0 me-3">Attachments</h5>
+            <button class="btn btn-secondary me-2">匯出紀錄</button>
+            <button class="btn btn-success me-2">同意</button>
+            <button class="btn btn-danger me-2">拒絕</button>
+            <button class="btn btn-warning text-white">警告送出</button>
+        </div>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -42,38 +42,26 @@ from datetime import datetime
 
 def rollback_task_detail(request):
     # 模擬每一筆的 ooc_record_status
-    task_list = [
-        {
-            'cname': 'Xbar-R', 'gname': 'Line1', 'ctype': 'Xbar-R', 'trend_chart': 'Xbar-R_Line1_Xbar-R.png', 'reason': '點超出UCL', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'XR', 'gname': 'Line2', 'ctype': 'XR', 'trend_chart': 'XR_Line2_XR.png', 'reason': '連續7點上升', 'ooc_record_status': '超過半年high'
-        },
-        {
-            'cname': 'P Chart', 'gname': 'Line3', 'ctype': 'P', 'trend_chart': 'P Chart_Line3_P.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'C Chart', 'gname': 'Line4', 'ctype': 'C', 'trend_chart': 'C Chart_Line4_C.png', 'reason': 'None', 'ooc_record_status': '低於半年low'
-        },
-        {
-            'cname': 'U Chart', 'gname': 'Line5', 'ctype': 'U', 'trend_chart': 'U Chart_Line5_U.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'Xbar-S', 'gname': 'Line6', 'ctype': 'Xbar-S', 'trend_chart': 'Xbar-S_Line6_Xbar-S.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'np Chart', 'gname': 'Line7', 'ctype': 'np', 'trend_chart': 'np Chart_Line7_np.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'XmR', 'gname': 'Line8', 'ctype': 'XmR', 'trend_chart': 'XmR_Line8_XmR.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'MR', 'gname': 'Line9', 'ctype': 'MR', 'trend_chart': 'MR_Line9_MR.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
-        {
-            'cname': 'Laney P', 'gname': 'Line10', 'ctype': 'Laney P', 'trend_chart': 'Laney P_Line10_Laney P.png', 'reason': 'None', 'ooc_record_status': '正常'
-        },
+    base_tasks = [
+        {'cname': 'Xbar-R', 'gname': 'Line1', 'ctype': 'Xbar-R', 'reason': '點超出UCL', 'ooc_record_status': '正常'},
+        {'cname': 'XR', 'gname': 'Line2', 'ctype': 'XR', 'reason': '連續7點上升', 'ooc_record_status': '超過半年high'},
+        {'cname': 'P Chart', 'gname': 'Line3', 'ctype': 'P', 'reason': 'None', 'ooc_record_status': '正常'},
+        {'cname': 'C Chart', 'gname': 'Line4', 'ctype': 'C', 'reason': 'None', 'ooc_record_status': '低於半年low'},
+        {'cname': 'U Chart', 'gname': 'Line5', 'ctype': 'U', 'reason': 'None', 'ooc_record_status': '正常'},
+        {'cname': 'Xbar-S', 'gname': 'Line6', 'ctype': 'Xbar-S', 'reason': 'None', 'ooc_record_status': '正常'},
+        {'cname': 'np Chart', 'gname': 'Line7', 'ctype': 'np', 'reason': 'None', 'ooc_record_status': '正常'},
+        {'cname': 'XmR', 'gname': 'Line8', 'ctype': 'XmR', 'reason': 'None', 'ooc_record_status': '正常'},
+        {'cname': 'MR', 'gname': 'Line9', 'ctype': 'MR', 'reason': 'None', 'ooc_record_status': '正常'},
+        {'cname': 'Laney P', 'gname': 'Line10', 'ctype': 'Laney P', 'reason': 'None', 'ooc_record_status': '正常'},
     ]
+    # 關閉 GNAME_CNAME_CTYPE 組合命名，改回預設命名（如需開啟再恢復下方註解）
+    task_list = []
+    for t in base_tasks:
+        # 預設命名方式，與原本欄位一致
+        trend_chart = f"{t['cname']}_{t['gname']}_{t['ctype']}.png"
+        task = t.copy()
+        task['trend_chart'] = trend_chart
+        task_list.append(task)
     context = {
         'task': {
             'title': 'F18A - Rollback_CHI Task',
